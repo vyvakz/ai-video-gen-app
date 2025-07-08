@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoGenAI - AI-Powered Video Creation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5e35b1;
+            --primary-light: #7e57c2;
+            --secondary: #26a69a;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --light: #f1f5f9;
+            --lighter: #ffffff;
+            --surface: #1e293b;
+            --warning: #ff9800;
+            --error: #ff5252;
+            --success: #4caf50;
+            --border-radius: 16px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.15);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--lighter);
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--lighter);
+        }
+
+        .logo-text p {
+            font-size: 1rem;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary) 0%, #00897b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--lighter);
+        }
+
+        .content {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 25px 20px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            padding-left: 15px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: #cbd5e1;
+        }
+
+        .nav-item:hover {
+            background: rgba(30, 41, 59, 0.5);
+            color: var(--lighter);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .section {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--lighter);
+        }
+
+        .section-subtitle {
+            color: #94a3b8;
+            margin-top: 5px;
+            font-size: 1rem;
+        }
+
+        .content-type {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .type-card {
+            flex: 1;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            color: #e2e8f0;
+        }
+
+        .type-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .type-card.active {
+            background: rgba(94, 53, 177, 0.2);
+            border-color: var(--primary);
+            color: var(--lighter);
+        }
+
+        .type-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-light);
+        }
+
+        .type-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--lighter);
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--lighter);
+        }
+
+        textarea, select, input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--lighter);
+            transition: var(--transition);
+        }
+
+        textarea:focus, select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 53, 177, 0.3);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .style-card {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            color: #e2e8f0;
+        }
+
+        .style-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            color: var(--lighter);
+        }
+
+        .style-card.active {
+            background: rgba(94, 53, 177, 0.2);
+            border-color: var(--primary);
+            color: var(--lighter);
+        }
+
+        .style-card i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--primary-light);
+        }
+
+        .btn {
+            padding: 16px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(94, 53, 177, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(94, 53, 177, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.7);
+            color: var(--light);
+            border: 1px solid #475569;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(38, 166, 154, 0.2);
+            border-color: var(--secondary);
+            color: var(--lighter);
+        }
+
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .preview-card {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .preview-header {
+            padding: 15px 20px;
+            background: rgba(30, 41, 59, 0.9);
+            border-bottom: 1px solid #334155;
+        }
+
+        .preview-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--lighter);
+        }
+
+        .preview-subtitle {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .preview-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .preview-image {
+            width: 100%;
+            border-radius: 8px;
+            max-height: 300px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-placeholder {
+            width: 100%;
+            height: 200px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            border: 1px dashed #475569;
+        }
+
+        .preview-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #64748b;
+        }
+
+        .progress-container {
+            margin-top: 25px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            color: var(--lighter);
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 6px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: #94a3b8;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+            color: var(--secondary);
+        }
+
+        .stat-label {
+            color: #94a3b8;
+        }
+
+        .video-player {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            aspect-ratio: 16/9;
+            margin-top: 20px;
+        }
+
+        .video-player video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .timeline {
+            margin-top: 30px;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .timeline-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .timeline-segment {
+            min-width: 100px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            border: 1px solid #334155;
+        }
+
+        .timeline-segment.active {
+            background: rgba(94, 53, 177, 0.3);
+            border: 1px solid var(--primary);
+        }
+
+        .segment-duration {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--lighter);
+        }
+
+        .segment-status {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .segment-status.completed {
+            color: var(--success);
+        }
+
+        .segment-status.processing {
+            color: var(--warning);
+        }
+        
+        .segment-status.failed {
+            color: var(--error);
+        }
+
+        .footer {
+            padding: 20px 30px;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .script-preview {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+        }
+
+        .script-content {
+            white-space: pre-wrap;
+            font-family: monospace;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .log-container {
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .log-timestamp {
+            color: var(--primary-light);
+            margin-right: 10px;
+        }
+
+        .thumbnail-gallery {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .thumbnail-item {
+            min-width: 200px;
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .thumbnail-item.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(94, 53, 177, 0.5);
+        }
+
+        .thumbnail-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        /* Login screen styles */
+        #loginScreen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .login-logo {
+            margin-bottom: 30px;
+        }
+
+        .login-logo-icon {
+            font-size: 4rem;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--lighter);
+        }
+
+        .login-subtitle {
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .login-button {
+            background: #24292e;
+            color: white;
+            border-radius: 8px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .login-button:hover {
+            background: #2d333b;
+            transform: translateY(-2px);
+        }
+
+        .logout-button {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid #475569;
+        }
+
+        .logout-button:hover {
+            background: rgba(255, 82, 82, 0.2);
+            border-color: var(--error);
+        }
+
+        .app-content {
+            display: none;
+        }
+
+        /* Segment controls */
+        .segment-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        /* Responsive design */
+        @media (max-width: 900px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 15px;
+            }
+            
+            .preview-container {
+                flex-direction: column;
+            }
+            
+            .type-card, .stat-card {
+                padding: 15px;
+            }
+            
+            .nav-item {
+                padding: 12px 15px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .content-type {
+                flex-direction: column;
+            }
+            
+            .video-controls {
+                flex-direction: column;
+            }
+            
+            .progress-stats {
+                flex-wrap: wrap;
+            }
+            
+            .stat-card {
+                min-width: 45%;
+                margin-bottom: 10px;
+            }
+            
+            .style-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .segment-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loginScreen">
+            <div class="login-logo">
+                <div class="login-logo-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <h1 class="login-title">VideoGenAI</h1>
+                <p class="login-subtitle">Create stunning 1-2 minute videos from your story scripts using AI-powered tools</p>
+            </div>
+            <div id="loginButton" class="login-button">
+                <i class="fab fa-github"></i> Sign in with GitHub
+            </div>
+            <div class="log-container" id="loginLogContainer">
+                <div class="log-entry"><span class="log-timestamp">[00:00:00]</span> System: Ready to sign in</div>
+            </div>
+        </div>
+        
+        <div id="appContent" class="app-content">
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>VideoGenAI</h1>
+                        <p>Create 1-2 minute videos from your story scripts</p>
+                    </div>
+                </div>
+                <div class="auth-section">
+                    <div class="user-info" id="userInfo">
+                        <div class="user-avatar" id="userAvatar">JD</div>
+                        <div>
+                            <div id="userName">John Doe</div>
+                            <div id="userPlan" style="font-size: 0.9rem; color: #cbd5e1;">Pro Plan</div>
+                        </div>
+                        <button id="logoutButton" class="logout-button">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="sidebar">
+                    <div class="nav-title">MAIN NAVIGATION</div>
+                    <div class="nav-item active">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-script"></i>
+                        <span>Script Generation</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-image"></i>
+                        <span>Thumbnail Preview</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-video"></i>
+                        <span>Video Generation</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </div>
+                    
+                    <div class="nav-title" style="margin-top: 30px;">RESOURCES</div>
+                    <div class="nav-item">
+                        <i class="fas fa-book"></i>
+                        <span>Documentation</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-headset"></i>
+                        <span>Support</span>
+                    </div>
+                </div>
+                
+                <div class="main-content">
+                    <div class="section">
+                        <div class="section-header">
+                            <div>
+                                <h2 class="section-title">Create New Video</h2>
+                                <div class="section-subtitle">Generate 1-2 minute videos from your story scripts</div>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Content Type</label>
+                            <div class="content-type">
+                                <div class="type-card active" data-type="informational">
+                                    <i class="fas fa-info-circle"></i>
+                                    <h3>Informational</h3>
+                                    <p>Educational content, tutorials</p>
+                                </div>
+                                <div class="type-card" data-type="product">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <h3>Product Demo</h3>
+                                    <p>Showcase products or features</p>
+                                </div>
+                                <div class="type-card" data-type="story">
+                                    <i class="fas fa-book-open"></i>
+                                    <h3>Storytelling</h3>
+                                    <p>Narratives and creative stories</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="topic">Video Topic</label>
+                            <input type="text" id="topic" placeholder="Enter your video topic (e.g., 'The importance of sleep', 'How our product solves X problem')">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="description">Additional Details</label>
+                            <textarea id="description" placeholder="Provide any additional details about your video..."></textarea>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Video Length</label>
+                            <div style="display: flex; gap: 15px;">
+                                <select id="duration" style="flex: 1;">
+                                    <option value="60">1 minute (60 seconds)</option>
+                                    <option value="90" selected>1.5 minutes (90 seconds)</option>
+                                    <option value="120">2 minutes (120 seconds)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="generateScriptBtn">
+                            <i class="fas fa-wand-magic-sparkles"></i> Generate Story Script
+                        </button>
+                        
+                        <div class="script-preview" id="scriptPreview" style="display: none;">
+                            <h3 style="margin-bottom: 15px; color: var(--lighter);">Generated Script</h3>
+                            <div class="script-content" id="scriptContent"></div>
+                        </div>
+                        
+                        <div class="log-container" id="logContainer">
+                            <div class="log-entry"><span class="log-timestamp">[12:45:31]</span> System: Ready to generate your video</div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div>
+                                <h2 class="section-title">Thumbnail Preview</h2>
+                                <div class="section-subtitle">Select a visual style for your video thumbnail</div>
+                            </div>
+                            <button class="btn btn-primary" id="generateThumbnailBtn">
+                                <i class="fas fa-image"></i> Generate Thumbnails
+                            </button>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Visual Style</label>
+                            <div class="style-grid">
+                                <div class="style-card active" data-style="watercolor">
+                                    <i class="fas fa-paint-brush"></i>
+                                    <div>Watercolor</div>
+                                </div>
+                                <div class="style-card" data-style="line">
+                                    <i class="fas fa-drafting-compass"></i>
+                                    <div>Line Art</div>
+                                </div>
+                                <div class="style-card" data-style="voxel">
+                                    <i class="fas fa-cube"></i>
+                                    <div>Voxel</div>
+                                </div>
+                                <div class="style-card" data-style="comic">
+                                    <i class="fas fa-book"></i>
+                                    <div>Comic Book</div>
+                                </div>
+                                <div class="style-card" data-style="realistic">
+                                    <i class="fas fa-camera"></i>
+                                    <div>Realistic</div>
+                                </div>
+                                <div class="style-card" data-style="abstract">
+                                    <i class="fas fa-palette"></i>
+                                    <div>Abstract</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Generated Thumbnails</label>
+                            <div class="thumbnail-gallery" id="thumbnailGallery">
+                                <div class="preview-placeholder" id="thumbnailsPlaceholder">
+                                    <i class="fas fa-images"></i>
+                                    <div>No thumbnails generated yet</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="generateVideoBtn" style="margin-top: 25px; display: none;">
+                            <i class="fas fa-play-circle"></i> Start Video Generation
+                        </button>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div>
+                                <h2 class="section-title">Video Generation Progress</h2>
+                                <div class="section-subtitle">Creating your <span id="durationDisplay">90</span>-second video in segments</div>
+                            </div>
+                            <button class="btn btn-secondary" id="downloadBtn">
+                                <i class="fas fa-download"></i> Download Segments
+                            </button>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <div class="progress-title">Video Generation Progress</div>
+                                <div id="progressPercentage">0% Complete</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <div>0:00</div>
+                                <div id="midDuration">0:45</div>
+                                <div id="endDuration">1:30</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px; margin-top: 25px; flex-wrap: wrap;">
+                            <div class="stat-card">
+                                <i class="fas fa-layer-group"></i>
+                                <div class="stat-value" id="totalSegments">0</div>
+                                <div class="stat-label">Total Segments</div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-check-circle"></i>
+                                <div class="stat-value" id="completedSegments">0</div>
+                                <div class="stat-label">Segments Done</div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-sync-alt"></i>
+                                <div class="stat-value" id="processingSegments">0</div>
+                                <div class="stat-label">In Progress</div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-hourglass-half"></i>
+                                <div class="stat-value" id="pendingSegments">0</div>
+                                <div class="stat-label">Pending</div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline">
+                            <div class="timeline-header">
+                                <div class="progress-title">Video Segments Timeline</div>
+                                <div>Each segment: 10 seconds</div>
+                            </div>
+                            <div class="timeline-container" id="timelineContainer">
+                                <!-- Timeline segments will be generated here -->
+                            </div>
+                        </div>
+                        
+                        <div class="preview-container">
+                            <div class="preview-card">
+                                <div class="preview-header">
+                                    <div class="preview-title">Current Segment Preview</div>
+                                    <div class="preview-subtitle">Segment <span id="currentSegment">1</span> (<span id="segmentTime">0:00-0:10</span>)</div>
+                                </div>
+                                <div class="preview-content">
+                                    <div class="video-player" id="videoPlayer">
+                                        <div class="preview-placeholder" id="videoPlaceholder">
+                                            <i class="fas fa-video"></i>
+                                            <div>Video segment preview</div>
+                                        </div>
+                                        <video id="segmentVideo" controls style="display: none; width: 100%; height: 100%;"></video>
+                                    </div>
+                                    <div class="segment-controls">
+                                        <button class="btn btn-secondary" id="regenerateSegmentBtn">
+                                            <i class="fas fa-redo"></i> Regenerate Segment
+                                        </button>
+                                        <button class="btn btn-primary" id="generateNextSegmentBtn" style="display: none;">
+                                            <i class="fas fa-step-forward"></i> Generate Next Segment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="preview-card">
+                                <div class="preview-header">
+                                    <div class="preview-title">Final Frame for Next Segment</div>
+                                    <div class="preview-subtitle">Will be used as input for Segment <span id="nextSegment">2</span></div>
+                                </div>
+                                <div class="preview-content">
+                                    <div class="preview-placeholder" id="framePlaceholder">
+                                        <i class="fas fa-image"></i>
+                                        <div>No frame generated yet</div>
+                                    </div>
+                                    <img src="" alt="Final Frame" class="preview-image" id="framePreview" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>VideoGenAI - AI-Powered Video Generation Platform | © 2023 BytePlus Technologies</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const loginScreen = document.getElementById('loginScreen');
+            const appContent = document.getElementById('appContent');
+            const loginButton = document.getElementById('loginButton');
+            const logoutButton = document.getElementById('logoutButton');
+            const userInfo = document.getElementById('userInfo');
+            const userName = document.getElementById('userName');
+            const userPlan = document.getElementById('userPlan');
+            const userAvatar = document.getElementById('userAvatar');
+            const generateScriptBtn = document.getElementById('generateScriptBtn');
+            const generateVideoBtn = document.getElementById('generateVideoBtn');
+            const generateThumbnailBtn = document.getElementById('generateThumbnailBtn');
+            const scriptPreview = document.getElementById('scriptPreview');
+            const scriptContent = document.getElementById('scriptContent');
+            const logContainer = document.getElementById('logContainer');
+            const loginLogContainer = document.getElementById('loginLogContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressPercentage = document.getElementById('progressPercentage');
+            const thumbnailGallery = document.getElementById('thumbnailGallery');
+            const thumbnailsPlaceholder = document.getElementById('thumbnailsPlaceholder');
+            const durationDisplay = document.getElementById('durationDisplay');
+            const timelineContainer = document.getElementById('timelineContainer');
+            const totalSegments = document.getElementById('totalSegments');
+            const completedSegments = document.getElementById('completedSegments');
+            const processingSegments = document.getElementById('processingSegments');
+            const pendingSegments = document.getElementById('pendingSegments');
+            const currentSegment = document.getElementById('currentSegment');
+            const segmentTime = document.getElementById('segmentTime');
+            const nextSegment = document.getElementById('nextSegment');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const segmentVideo = document.getElementById('segmentVideo');
+            const videoPlaceholder = document.getElementById('videoPlaceholder');
+            const framePreview = document.getElementById('framePreview');
+            const framePlaceholder = document.getElementById('framePlaceholder');
+            const regenerateSegmentBtn = document.getElementById('regenerateSegmentBtn');
+            const generateNextSegmentBtn = document.getElementById('generateNextSegmentBtn');
+            
+            // State variables
+            let currentScriptId = null;
+            let selectedThumbnailId = null;
+            let videoGenerationId = null;
+            let generatedThumbnails = [];
+            let currentUser = null;
+            let currentSegmentIndex = 0;
+            let currentFrameUrl = null;
+            let totalSegmentCount = 0;
+            
+            // GitHub Login
+            loginButton.addEventListener('click', () => {
+                // Redirect to GitHub OAuth
+                const clientId = ''; // Replace with your actual client ID
+                const redirectUri = encodeURIComponent(window.location.origin + '/auth/github/callback');
+                const scope = encodeURIComponent('user:email');
+                
+                window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+            });
+            
+            // Logout
+            logoutButton.addEventListener('click', () => {
+                fetch('/logout', { method: 'POST' })
+                .then(() => {
+                    loginScreen.style.display = 'flex';
+                    appContent.style.display = 'none';
+                    sessionStorage.removeItem('user');
+                    currentUser = null;
+                    addLog('You have been logged out', 'info', loginLogContainer);
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    addLog('Logout failed', 'error');
+                });
+            });
+            
+            // Update UI with user data
+            function updateUserUI(user) {
+                if (!user) return;
+                
+                loginScreen.style.display = 'none';
+                appContent.style.display = 'block';
+                userName.textContent = user.name;
+                userAvatar.textContent = user.initials;
+                userPlan.textContent = user.plan || 'Free Plan';
+                currentUser = user;
+                
+                addLog(`Welcome, ${user.name}!`);
+            }
+            
+            // Add log entry
+            function addLog(message, type = 'info', container = logContainer) {
+                if (!container) return;
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                
+                const now = new Date();
+                const timestamp = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+                
+                logEntry.innerHTML = `<span class="log-timestamp">${timestamp}</span> ${message}`;
+                
+                if (type === 'error') {
+                    logEntry.style.color = '#ff6b6b';
+                } else if (type === 'success') {
+                    logEntry.style.color = '#51cf66';
+                }
+                
+                container.prepend(logEntry);
+                
+                // Auto-scroll to top
+                container.scrollTop = 0;
+            }
+            
+            // Initialize
+            function init() {
+                // Check for auth token in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                
+                if (token) {
+                    try {
+                        // Remove token from URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        
+                        // Base64 decode the payload
+                        const base64Url = token.split('.')[1];
+                        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                        }).join(''));
+                        
+                        const payload = JSON.parse(jsonPayload);
+                        const userData = {
+                            id: payload.id,
+                            name: payload.name,
+                            initials: payload.initials,
+                            plan: payload.plan || 'Free Plan',
+                            token: token  // Store the actual token string
+                        };
+                        
+                        // Store user data
+                        sessionStorage.setItem('user', JSON.stringify(userData));
+                        updateUserUI(userData);
+                    } catch (e) {
+                        console.error('Token parsing error:', e);
+                        addLog('Login failed. Please try again.', 'error', loginLogContainer);
+                    }
+                } else {
+                    // Check if user is already logged in
+                    const userData = sessionStorage.getItem('user');
+                    if (userData) {
+                        try {
+                            const user = JSON.parse(userData);
+                            updateUserUI(user);
+                        } catch (e) {
+                            console.error('Error parsing user data:', e);
+                            addLog('Session expired. Please login again.', 'error', loginLogContainer);
+                        }
+                    } else {
+                        addLog('Please sign in to access VideoGenAI', 'info', loginLogContainer);
+                    }
+                }
+                
+                addLog('System initialized. Ready to generate videos.');
+            }
+            
+            // Get user ID for API calls
+            function getUserId() {
+                if (!currentUser) {
+                    addLog('Error: Please login first', 'error');
+                    return null;
+                }
+                return currentUser.id;
+            }
+            
+            // Content type selection
+            const typeCards = document.querySelectorAll('.type-card');
+            typeCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    typeCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    addLog(`Content type changed to: ${card.querySelector('h3').textContent}`);
+                });
+            });
+            
+            // Style selection
+            const styleCards = document.querySelectorAll('.style-card');
+            styleCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    styleCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    addLog(`Visual style changed to: ${card.querySelector('div').textContent}`);
+                });
+            });
+            
+            // Video duration change
+            const durationSelect = document.getElementById('duration');
+            durationSelect.addEventListener('change', () => {
+                const duration = parseInt(durationSelect.value);
+                durationDisplay.textContent = duration;
+                addLog(`Video duration set to: ${duration} seconds`);
+                
+                // Update end duration display
+                const minutes = Math.floor(duration / 60);
+                const seconds = duration % 60;
+                document.getElementById('endDuration').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('midDuration').textContent = `${Math.floor(minutes/2)}:${Math.floor(seconds/2).toString().padStart(2, '0')}`;
+            });
+            
+            // Generate Script Button
+            generateScriptBtn.addEventListener('click', async () => {
+                const userId = getUserId();
+                if (!userId) return;
+                
+                const topic = document.getElementById('topic').value;
+                const description = document.getElementById('description').value;
+                const contentType = document.querySelector('.type-card.active').dataset.type;
+                const duration = parseInt(durationSelect.value);
+                
+                if (!topic) {
+                    addLog('Error: Please enter a video topic', 'error');
+                    return;
+                }
+                
+                addLog(`Starting script generation for topic: "${topic}"`);
+                generateScriptBtn.disabled = true;
+                generateScriptBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+                
+                try {
+                    const response = await fetch('/generate-script', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentUser.token}`
+                        },
+                        body: JSON.stringify({ 
+                            userId, 
+                            topic, 
+                            contentType, 
+                            duration 
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    scriptContent.textContent = data.script;
+                    scriptPreview.style.display = 'block';
+                    generateThumbnailBtn.style.display = 'inline-flex';
+                    currentScriptId = data.scriptId;
+                    
+                    addLog('Script generated successfully!');
+                    
+                    // Update timeline
+                    updateTimeline(duration);
+                    
+                    // Scroll to script
+                    scriptPreview.scrollIntoView({ behavior: 'smooth' });
+                } catch (error) {
+                    console.error('Error:', error);
+                    addLog(`Error: ${error.message || 'Failed to generate script'}`, 'error');
+                } finally {
+                    generateScriptBtn.disabled = false;
+                    generateScriptBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Generate Story Script';
+                }
+            });
+            
+            // Generate Thumbnails Button
+            generateThumbnailBtn.addEventListener('click', async () => {
+                const userId = getUserId();
+                if (!userId) return;
+                
+                if (!currentScriptId) {
+                    addLog('Error: Please generate a script first', 'error');
+                    return;
+                }
+                
+                const style = document.querySelector('.style-card.active').dataset.style;
+                
+                addLog(`Generating thumbnails with ${style} style...`);
+                generateThumbnailBtn.disabled = true;
+                generateThumbnailBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+                
+                try {
+                    const response = await fetch('/generate-thumbnails', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentUser.token}`
+                        },
+                        body: JSON.stringify({ 
+                            userId, 
+                            scriptId: currentScriptId,
+                            style 
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    generatedThumbnails = data.thumbnails;
+                    displayThumbnails(generatedThumbnails);
+                    
+                    // Change button to regenerate
+                    generateThumbnailBtn.innerHTML = '<i class="fas fa-sync"></i> Regenerate Thumbnails';
+                    generateVideoBtn.style.display = 'inline-flex';
+                    
+                    addLog(`${generatedThumbnails.length} thumbnails generated successfully!`);
+                } catch (error) {
+                    console.error('Error:', error);
+                    addLog(`Error: ${error.message || 'Failed to generate thumbnails'}`, 'error');
+                } finally {
+                    generateThumbnailBtn.disabled = false;
+                }
+            });
+            
+            // Display thumbnails in gallery
+            function displayThumbnails(thumbnails) {
+                thumbnailGallery.innerHTML = '';
+                thumbnailsPlaceholder.style.display = 'none';
+                
+                thumbnails.forEach((thumb, index) => {
+                    const thumbnailItem = document.createElement('div');
+                    thumbnailItem.className = 'thumbnail-item';
+                    thumbnailItem.dataset.id = thumb.id;
+                    thumbnailItem.innerHTML = `
+                        <img src="${thumb.url}" alt="Thumbnail ${index + 1}">
+                        <div style="padding: 10px; text-align: center;">Thumbnail ${index + 1}</div>
+                    `;
+                    
+                    thumbnailItem.addEventListener('click', () => {
+                        document.querySelectorAll('.thumbnail-item').forEach(item => {
+                            item.classList.remove('selected');
+                        });
+                        thumbnailItem.classList.add('selected');
+                        selectedThumbnailId = thumb.id;
+                        addLog(`Thumbnail ${index + 1} selected for video generation`);
+                    });
+                    
+                    thumbnailGallery.appendChild(thumbnailItem);
+                });
+            }
+            
+            // Generate Video Button
+            generateVideoBtn.addEventListener('click', async () => {
+                const userId = getUserId();
+                if (!userId) return;
+                
+                if (!selectedThumbnailId) {
+                    addLog('Error: Please select a thumbnail', 'error');
+                    return;
+                }
+                
+                addLog('Starting video generation process...');
+                generateVideoBtn.disabled = true;
+                generateVideoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...';
+                
+                try {
+                    const response = await fetch('/start-video-generation', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentUser.token}`
+                        },
+                        body: JSON.stringify({ 
+                            userId, 
+                            scriptId: currentScriptId,
+                            thumbnailId: selectedThumbnailId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    videoGenerationId = data.videoGenerationId;
+                    totalSegmentCount = Math.ceil(parseInt(durationSelect.value) / 10);
+                    currentSegmentIndex = 0;
+                    addLog(`Video generation started with ID: ${videoGenerationId}`);
+                    
+                    // Start first segment
+                    generateSegment(currentSegmentIndex);
+                } catch (error) {
+                    console.error('Error:', error);
+                    addLog(`Error: ${error.message || 'Failed to start video generation'}`, 'error');
+                    generateVideoBtn.disabled = false;
+                    generateVideoBtn.innerHTML = '<i class="fas fa-play-circle"></i> Start Video Generation';
+                }
+            });
+            
+            // Generate a single segment
+            async function generateSegment(segmentIndex) {
+                const userId = getUserId();
+                if (!userId) return;
+                
+                addLog(`Starting generation for segment ${segmentIndex + 1}`);
+                
+                // Update UI
+                generateNextSegmentBtn.disabled = true;
+                regenerateSegmentBtn.disabled = true;
+                generateNextSegmentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                regenerateSegmentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                
+                try {
+                    const response = await fetch('/generate-segment', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentUser.token}`
+                        },
+                        body: JSON.stringify({ 
+                            videoGenerationId,
+                            segmentIndex,
+                            // For first segment use thumbnail, for others use last frame
+                            imageUrl: segmentIndex === 0 ? 
+                                generatedThumbnails.find(t => t.id === selectedThumbnailId).url : 
+                                currentFrameUrl
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // Update preview
+                    videoPlaceholder.style.display = 'none';
+                    segmentVideo.style.display = 'block';
+                    segmentVideo.src = data.videoUrl;
+                    
+                    // Update frame preview
+                    framePlaceholder.style.display = 'none';
+                    framePreview.style.display = 'block';
+                    framePreview.src = data.frameUrl;
+                    currentFrameUrl = data.frameUrl;
+                    
+                    addLog(`Segment ${segmentIndex + 1} generated successfully!`);
+                    
+                    // Update progress
+                    updateProgress(segmentIndex);
+                    
+                    // Update buttons
+                    generateNextSegmentBtn.disabled = false;
+                    regenerateSegmentBtn.disabled = false;
+                    generateNextSegmentBtn.innerHTML = '<i class="fas fa-step-forward"></i> Generate Next Segment';
+                    regenerateSegmentBtn.innerHTML = '<i class="fas fa-redo"></i> Regenerate Segment';
+                    
+                    // Show next segment button if not last segment
+                    if (segmentIndex < totalSegmentCount - 1) {
+                        generateNextSegmentBtn.style.display = 'inline-flex';
+                        nextSegment.textContent = segmentIndex + 2;
+                    } else {
+                        generateNextSegmentBtn.style.display = 'none';
+                        addLog('All segments completed!');
+                    }
+                } catch (error) {
+                    console.error('Segment generation error:', error);
+                    addLog(`Error generating segment ${segmentIndex + 1}: ${error.message}`, 'error');
+                    
+                    // Reset buttons
+                    generateNextSegmentBtn.disabled = false;
+                    regenerateSegmentBtn.disabled = false;
+                    generateNextSegmentBtn.innerHTML = '<i class="fas fa-step-forward"></i> Generate Next Segment';
+                    regenerateSegmentBtn.innerHTML = '<i class="fas fa-redo"></i> Regenerate Segment';
+                }
+            }
+            
+            // Regenerate Segment Button
+            regenerateSegmentBtn.addEventListener('click', () => {
+                generateSegment(currentSegmentIndex);
+            });
+            
+            // Generate Next Segment Button
+            generateNextSegmentBtn.addEventListener('click', () => {
+                currentSegmentIndex++;
+                generateSegment(currentSegmentIndex);
+            });
+            
+            // Update progress
+            function updateProgress(segmentIndex) {
+                // Update progress bar
+                const progress = ((segmentIndex + 1) / totalSegmentCount) * 100;
+                progressFill.style.width = `${progress}%`;
+                progressPercentage.textContent = `${Math.round(progress)}% Complete`;
+                
+                // Update segment stats
+                totalSegments.textContent = totalSegmentCount;
+                completedSegments.textContent = segmentIndex + 1;
+                processingSegments.textContent = 0;
+                pendingSegments.textContent = totalSegmentCount - (segmentIndex + 1);
+                
+                // Update timeline
+                updateTimelineSegments(segmentIndex + 1);
+                
+                // Update current segment
+                currentSegment.textContent = segmentIndex + 1;
+                
+                // Calculate segment time
+                const segmentStart = segmentIndex * 10;
+                const segmentStartMin = Math.floor(segmentStart / 60);
+                const segmentStartSec = segmentStart % 60;
+                const segmentEnd = Math.min(segmentStart + 10, parseInt(durationSelect.value));
+                const segmentEndMin = Math.floor(segmentEnd / 60);
+                const segmentEndSec = segmentEnd % 60;
+                
+                segmentTime.textContent = `${segmentStartMin}:${segmentStartSec.toString().padStart(2, '0')}-${segmentEndMin}:${segmentEndSec.toString().padStart(2, '0')}`;
+                nextSegment.textContent = segmentIndex + 2;
+            }
+            
+            // Update timeline segments
+            function updateTimelineSegments(completedCount) {
+                timelineContainer.innerHTML = '';
+                const segmentCount = totalSegmentCount;
+                
+                for (let i = 0; i < segmentCount; i++) {
+                    const start = i * 10;
+                    const end = Math.min((i + 1) * 10, parseInt(durationSelect.value));
+                    
+                    const startMin = Math.floor(start / 60);
+                    const startSec = start % 60;
+                    const endMin = Math.floor(end / 60);
+                    const endSec = end % 60;
+                    
+                    const segment = document.createElement('div');
+                    segment.className = 'timeline-segment';
+                    
+                    let statusText = 'Pending';
+                    let statusClass = '';
+                    
+                    if (i < completedCount) {
+                        statusText = 'Completed';
+                        statusClass = 'completed';
+                    } else if (i === completedCount) {
+                        statusText = 'Processing';
+                        statusClass = 'processing';
+                    }
+                    
+                    segment.innerHTML = `
+                        <div class="segment-duration">${startMin}:${startSec.toString().padStart(2, '0')}-${endMin}:${endSec.toString().padStart(2, '0')}</div>
+                        <div class="segment-status ${statusClass}">${statusText}</div>
+                    `;
+                    
+                    if (i === currentSegmentIndex) {
+                        segment.classList.add('active');
+                    }
+                    
+                    timelineContainer.appendChild(segment);
+                }
+            }
+            
+            // Update timeline based on duration
+            function updateTimeline(duration) {
+                timelineContainer.innerHTML = '';
+                totalSegmentCount = Math.ceil(duration / 10);
+                totalSegments.textContent = totalSegmentCount;
+                pendingSegments.textContent = totalSegmentCount;
+                
+                for (let i = 0; i < totalSegmentCount; i++) {
+                    const start = i * 10;
+                    const end = Math.min((i + 1) * 10, duration);
+                    
+                    const startMin = Math.floor(start / 60);
+                    const startSec = start % 60;
+                    const endMin = Math.floor(end / 60);
+                    const endSec = end % 60;
+                    
+                    const segment = document.createElement('div');
+                    segment.className = 'timeline-segment';
+                    segment.innerHTML = `
+                        <div class="segment-duration">${startMin}:${startSec.toString().padStart(2, '0')}-${endMin}:${endSec.toString().padStart(2, '0')}</div>
+                        <div class="segment-status">Pending</div>
+                    `;
+                    timelineContainer.appendChild(segment);
+                }
+            }
+            
+            init();
+        });
+    </script>
+</body>
+</html>
