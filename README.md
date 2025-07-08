@@ -52,7 +52,7 @@ Update server.js with your BytePlus model id the following section
     const response = await axios.post(
         'https://ark.ap-southeast.bytepluses.com/api/v3/images/generations',
         {
-          model: "ep-20250623172846-n74m8",  //Update with your model ID from BytePlus seedream or equivalent
+          model: "",  //Update with your model ID from BytePlus seedream or equivalent
 
 Update server.js with your BytePlus model id the following section
     // Create video generation task
