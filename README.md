@@ -11,6 +11,9 @@ Web application for generating detailed prompts and images to create long AI vid
 - Video storage on BytePlus Object Storage
 - Web-based interface
 
+## Architecture 
+<img width="3840" height="947" alt="Architecture" src="https://github.com/user-attachments/assets/7876ab2b-25c7-403d-98a8-b919607e4b48" />
+
 
 ## Quick Start
 
