@@ -12,7 +12,7 @@ Web application for generating detailed prompts and images to create long AI vid
 - Web-based interface
 
 ## Architecture 
-<img width="3840" height="947" alt="Architecture" src="https://github.com/user-attachments/assets/7876ab2b-25c7-403d-98a8-b919607e4b48" />
+<img width="3840" height="1510" alt="VideoGenArchitecture" src="https://github.com/user-attachments/assets/511474fd-d5b0-499a-8c5f-95c2bf7246ef" />
 
 
 ## Quick Start
