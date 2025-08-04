@@ -3,13 +3,13 @@
 ![Node.js](https://img.shields.io/badge/Node.js-18.x-green)
 ![Express](https://img.shields.io/badge/Express-4.x-lightgrey)
 
-Web application for generating detailed prompts and images to create long AI video contents through a Node.js 
+App for generating detailed story prompts and images to create long AI generated video contents.
 
 ## Features
 - Video generation pipeline using BytePlus ModelArk LLM service, Deepseek -> Seedream -> Seedance 
 - User authentication and authorization using Github
 - Video storage on BytePlus Object Storage
-- Web-based interface
+- Responsive Web-based interface
 
 ## Architecture 
 <img width="3840" height="1510" alt="VideoGenArchitecture" src="https://github.com/user-attachments/assets/511474fd-d5b0-499a-8c5f-95c2bf7246ef" />
