@@ -1,4 +1,4 @@
-# Video Generation Application
+# Programmable Video Generation 
 
 ![Node.js](https://img.shields.io/badge/Node.js-18.x-green)
 ![Express](https://img.shields.io/badge/Express-4.x-lightgrey)
