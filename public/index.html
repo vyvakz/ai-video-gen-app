@@ -773,8 +773,8 @@
                 <div class="login-logo-icon">
                     <i class="fas fa-film"></i>
                 </div>
-                <h1 class="login-title">VideoGenAI</h1>
-                <p class="login-subtitle">Create stunning 1-2 minute videos from your story scripts using AI-powered tools</p>
+                <h1 class="login-title">ClipCoder</h1>
+                <p class="login-subtitle">Build Stories, Not Just Clips</p>
             </div>
             <div id="loginButton" class="login-button">
                 <i class="fab fa-github"></i> Sign in with GitHub
@@ -892,6 +892,7 @@
                             <label>Video Length</label>
                             <div style="display: flex; gap: 15px;">
                                 <select id="duration" style="flex: 1;">
+                                    <option value="30">.5 minute (30 seconds)</option>
                                     <option value="60">1 minute (60 seconds)</option>
                                     <option value="90" selected>1.5 minutes (90 seconds)</option>
                                     <option value="120">2 minutes (120 seconds)</option>
@@ -1125,11 +1126,45 @@
             let currentSegmentIndex = 0;
             let currentFrameUrl = null;
             let totalSegmentCount = 0;
+            let allSegmentsDone = false;
+            let finalVideoUrl = null;
+            // Add Stitch Video button and final video preview
+            const previewContainer = document.querySelector('.preview-container');
+            const finalVideoCard = document.createElement('div');
+            finalVideoCard.className = 'preview-card';
+            finalVideoCard.style.display = 'none';
+            finalVideoCard.innerHTML = `
+                <div class="preview-header">
+                    <div class="preview-title">Final Stitched Video</div>
+                    <div class="preview-subtitle">Preview the full video</div>
+                </div>
+                <div class="preview-content">
+                    <div class="video-player" id="finalVideoPlayer">
+                        <div class="preview-placeholder" id="finalVideoPlaceholder">
+                            <i class="fas fa-film"></i>
+                            <div>Final video will appear here</div>
+                        </div>
+                        <video id="finalVideo" controls style="display: none; width: 100%; height: 100%;"></video>
+                    </div>
+                </div>
+            `;
+            previewContainer.appendChild(finalVideoCard);
+
+            const stitchBtn = document.createElement('button');
+            stitchBtn.className = 'btn btn-primary';
+            stitchBtn.id = 'stitchVideoBtn';
+            stitchBtn.style.display = 'none';
+            stitchBtn.style.marginTop = '20px';
+            stitchBtn.innerHTML = '<i class="fas fa-link"></i> Stitch All Segments';
+            previewContainer.appendChild(stitchBtn);
+
+            const finalVideo = finalVideoCard.querySelector('#finalVideo');
+            const finalVideoPlaceholder = finalVideoCard.querySelector('#finalVideoPlaceholder');
             
             // GitHub Login
             loginButton.addEventListener('click', () => {
                 // Redirect to GitHub OAuth
-                const clientId = ''; // Replace with your actual client ID
+                const clientId = 'Ov23li0la8gfD6HJHo57'; // Replace with your actual client ID
                 const redirectUri = encodeURIComponent(window.location.origin + '/auth/github/callback');
                 const scope = encodeURIComponent('user:email');
                 
@@ -1515,32 +1550,72 @@
                     videoPlaceholder.style.display = 'none';
                     segmentVideo.style.display = 'block';
                     segmentVideo.src = data.videoUrl;
-                    
+
                     // Update frame preview
                     framePlaceholder.style.display = 'none';
                     framePreview.style.display = 'block';
                     framePreview.src = data.frameUrl;
                     currentFrameUrl = data.frameUrl;
-                    
+
                     addLog(`Segment ${segmentIndex + 1} generated successfully!`);
-                    
+
                     // Update progress
                     updateProgress(segmentIndex);
-                    
+
                     // Update buttons
                     generateNextSegmentBtn.disabled = false;
                     regenerateSegmentBtn.disabled = false;
                     generateNextSegmentBtn.innerHTML = '<i class="fas fa-step-forward"></i> Generate Next Segment';
                     regenerateSegmentBtn.innerHTML = '<i class="fas fa-redo"></i> Regenerate Segment';
-                    
+
                     // Show next segment button if not last segment
                     if (segmentIndex < totalSegmentCount - 1) {
                         generateNextSegmentBtn.style.display = 'inline-flex';
                         nextSegment.textContent = segmentIndex + 2;
+                        stitchBtn.style.display = 'none';
+                        allSegmentsDone = false;
                     } else {
                         generateNextSegmentBtn.style.display = 'none';
                         addLog('All segments completed!');
+                        // Show stitch button if backend says all segments are done
+                        if (data.showStitchButton) {
+                            stitchBtn.style.display = 'inline-flex';
+                            allSegmentsDone = true;
+                        }
                     }
+            // Stitch Video Button handler
+            stitchBtn.addEventListener('click', async () => {
+                if (!videoGenerationId || !allSegmentsDone) return;
+                stitchBtn.disabled = true;
+                stitchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Stitching...';
+                addLog('Stitching all segments into final video...');
+                try {
+                    const response = await fetch('/stitch-video', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentUser.token}`
+                        },
+                        body: JSON.stringify({
+                            videoGenerationId,
+                            segmentCount: totalSegmentCount
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+                    finalVideoUrl = data.url;
+                    finalVideo.src = finalVideoUrl;
+                    finalVideo.style.display = 'block';
+                    finalVideoPlaceholder.style.display = 'none';
+                    finalVideoCard.style.display = 'block';
+                    addLog('Final video stitched and ready for preview!','success');
+                } catch (error) {
+                    addLog('Error stitching video: ' + (error.message || 'Unknown error'), 'error');
+                } finally {
+                    stitchBtn.disabled = false;
+                    stitchBtn.innerHTML = '<i class="fas fa-link"></i> Stitch All Segments';
+                }
+            });
                 } catch (error) {
                     console.error('Segment generation error:', error);
                     addLog(`Error generating segment ${segmentIndex + 1}: ${error.message}`, 'error');

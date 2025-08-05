@@ -43,7 +43,7 @@ app.get('/auth/github', (req, res) => {
   const clientId = process.env.GITHUB_CLIENT_ID;
   const redirectUri = encodeURIComponent(`${process.env.BASE_URL}/auth/github/callback`);
   const scope = 'user:email';
-  
+  console.log('ClientId to GitHub OAuth:', clientId);
   res.redirect(`https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`);
 });
 
@@ -163,7 +163,7 @@ app.post('/generate-script', authenticate, async (req, res) => {
     const response = await axios.post(
       'https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions',
       {
-        model: "", //Update with your model ID from BytePlus DeepSeek V3 or equivalent
+        model: "ep-20250715221438-kklst", //Update with your model ID from BytePlus DeepSeek V3 or equivalent
         messages: [
           {
             role: "system",
@@ -241,12 +241,12 @@ app.post('/generate-thumbnails', authenticate, async (req, res) => {
       const response = await axios.post(
         'https://ark.ap-southeast.bytepluses.com/api/v3/images/generations',
         {
-          model: "",  //Update with your model ID from BytePlus seedream or equivalent
+          model: "ep-20250623172846-n74m8",  //Update with your model ID from BytePlus seedream or equivalent
           prompt,
           response_format: "url",
           size: "1024x1024",
           guidance_scale: 3,
-          watermark: true
+          watermark: false
         },
         {
           headers: {
@@ -341,14 +341,38 @@ app.post('/generate-segment', authenticate, async (req, res) => {
   
   try {
     const segmentDuration = Math.min(10, script.duration - (segmentIndex * 10));
-    const segmentPrompt = `Scene ${segmentIndex+1}: ${script.content}`;
+
+    // Parse script for scene descriptions robustly
+    let sceneText = '';
+    const sceneRegex = /Scene (\d+):([\s\S]*?)(?=Scene \d+:|$)/g;
+    let match;
+    let scenes = [];
+    while ((match = sceneRegex.exec(script.script)) !== null) {
+      scenes.push(match[2].trim());
+    }
+    // Fallback: if no scenes found, split script by lines or by segment count
+    if (scenes.length === 0) {
+      // Try splitting by lines
+      const lines = script.script.split(/\r?\n/).filter(l => l.trim());
+      const approxLinesPerSegment = Math.ceil(lines.length / generation.totalSegments);
+      for (let i = 0; i < generation.totalSegments; i++) {
+        scenes.push(lines.slice(i * approxLinesPerSegment, (i + 1) * approxLinesPerSegment).join(' '));
+      }
+    }
+    if (scenes[segmentIndex]) {
+      sceneText = scenes[segmentIndex];
+    } else {
+      sceneText = `Segment ${segmentIndex+1}`;
+    }
+    const segmentPrompt = `Scene ${segmentIndex+1}: ${sceneText}`;
     console.log('segmentPrompt:', segmentPrompt);
     console.log('segmentDuration:', segmentDuration);
+
     // Create video generation task
     const taskResponse = await axios.post(
       'https://ark.ap-southeast.bytepluses.com/api/v3/contents/generations/tasks',
       {
-        model: "",//User your model ID from BytePlus seedance or equivalent
+        model: "ep-20250611215047-45lwr",//User your model ID from BytePlus seedance or equivalent
         content: [
           {
             type: "text",
@@ -371,7 +395,7 @@ app.post('/generate-segment', authenticate, async (req, res) => {
     );
     console.log('taskResponseData:', taskResponse.data);
     const taskId = taskResponse.data.id;
-    
+
     // Poll for task completion
     let status = 'running';
     let videoUrl = null;
@@ -388,26 +412,41 @@ app.post('/generate-segment', authenticate, async (req, res) => {
       );
       console.log('statusResponseData:', statusResponse.data);
       status = statusResponse.data.status;
-     if (status === 'succeeded') {
+      if (status === 'succeeded') {
         videoUrl = statusResponse.data.content.video_url;
       } else if (status === 'failed') {
         throw new Error(statusResponse.data.error.message);
       }
     }
-    
+
+    // Save segment video to TOS
+    const segmentKey = `${user.storagePath}videos/${videoGenerationId}/segment_${segmentIndex}.mp4`;
+    const videoResponse = await axios.get(videoUrl, { responseType: 'arraybuffer' });
+    await tosClient.putObject({
+      bucket: process.env.TOS_BUCKET_NAME,
+      key: segmentKey,
+      body: videoResponse.data,
+      contentType: 'video/mp4'
+    });
+    const segmentTosUrl = `https://${process.env.TOS_BUCKET_NAME}.${process.env.TOS_ENDPOINT}/${segmentKey}`;
+
     // Extract last frame
     const frameUrl = await extractLastFrame(videoUrl, user, `${videoGenerationId}_${segmentIndex}`);
-    
+
     // Update generation state
     generation.segments[segmentIndex] = {
-      videoUrl,
+      videoUrl: segmentTosUrl,
       frameUrl
     };
     generation.currentSegment = segmentIndex;
-    
-    res.json({ 
-      videoUrl, 
-      frameUrl 
+
+    // Check if all segments are generated
+    const allSegmentsDone = generation.segments.length === generation.totalSegments && generation.segments.every(s => s);
+
+    res.json({
+      videoUrl: segmentTosUrl,
+      frameUrl,
+      showStitchButton: allSegmentsDone // Frontend: show stitch button if true
     });
   } catch (error) {
     console.error('Segment generation error:', error);
@@ -465,6 +504,53 @@ async function extractLastFrame(videoUrl, user, prefix) {
     throw error;
   }
 }
+
+//Endpoint to stitch all segments
+app.post('/stitch-video', async (req, res) => {
+  const { videoGenerationId, segmentCount } = req.body;
+  const generation = videoGenerations[videoGenerationId];
+  
+  if (!generation) {
+    return res.status(404).json({ error: 'Video generation not found' });
+  }
+  const user = users[generation.userId];
+  const tempDir = path.join(__dirname, 'temp', videoGenerationId);
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+  const segmentPaths = [];
+  // Download all segments from their public URLs
+  for (let i = 0; i < segmentCount; i++) {
+    const segmentUrl = `https://${process.env.TOS_BUCKET_NAME}.${process.env.TOS_ENDPOINT}/${user.storagePath}videos/${videoGenerationId}/segment_${i}.mp4`;
+    const segmentPath = path.join(tempDir, `segment_${i}.mp4`);
+    const response = await axios.get(segmentUrl, { responseType: 'arraybuffer' });
+    fs.writeFileSync(segmentPath, response.data);
+    segmentPaths.push(segmentPath);
+  }
+  // Stitch segments using ffmpeg
+  const concatListPath = path.join(tempDir, 'concat.txt');
+  fs.writeFileSync(concatListPath, segmentPaths.map(p => `file '${p}'`).join('\n'));
+  const stitchedPath = path.join(tempDir, 'stitched.mp4');
+  await new Promise((resolve, reject) => {
+      ffmpeg()
+          .input(concatListPath)
+          .inputOptions(['-f', 'concat', '-safe', '0'])
+          .outputOptions(['-c', 'copy'])
+          .output(stitchedPath)
+          .on('end', resolve)
+          .on('error', reject)
+          .run();
+  });
+  // Upload stitched video to TOS
+  const stitchedKey = `videos/${videoGenerationId}/stitched.mp4`;
+  await tosClient.putObject({
+      bucket: process.env.TOS_BUCKET_NAME,
+      key: stitchedKey,
+      body: fs.createReadStream(stitchedPath),
+      contentType: 'video/mp4'
+  });
+  // Return public stitched video URL for UI preview
+  const stitchedUrl = `https://${process.env.TOS_BUCKET_NAME}.${process.env.TOS_ENDPOINT}/${stitchedKey}`;
+  res.json({ url: stitchedUrl });
+});
 
 // Helper function to get initials from name
 function getInitials(name) {
